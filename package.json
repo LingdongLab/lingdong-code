@@ -1,0 +1,27 @@
+{
+  "name": "lingdong-code",
+  "version": "0.1.0",
+  "private": true,
+  "description": "灵动 Code：基于 Code-OSS 的开源 Windows AI 编程工作台（Agent 扩展 + Runtime + 打包脚本）",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*",
+    "vscode-extension/*"
+  ],
+  "scripts": {
+    "build:runtime": "npm run build --workspace @lingdong/agent-runtime",
+    "build:extension": "npm run build --workspace lingdong-agent",
+    "build": "npm run build:runtime && npm run build:extension",
+    "build:agent": "npm run build:runtime && npm run build:extension",
+    "test:runtime": "npm run test --workspace @lingdong/agent-runtime",
+    "test:extension": "npm run test --workspace lingdong-agent",
+    "test": "npm run build:runtime && npm run test:runtime && npm run test:extension",
+    "typecheck": "npm run build:runtime && npm run typecheck --workspace @lingdong/agent-runtime && npm run typecheck --workspace lingdong-agent"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "rcedit": "^4.0.1"
+  }
+}

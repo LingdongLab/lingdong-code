@@ -1,0 +1,714 @@
+/* Plan 专用：文档阅读态 / 结构化编辑态 */
+
+.plan-card {
+  max-width: var(--plan-max, 1040px);
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.plan-doc-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.plan-doc-title {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.plan-doc-meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  font-size: var(--font-meta);
+  color: var(--text-muted);
+}
+
+.plan-doc {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.plan-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plan-sec-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--text-muted);
+}
+
+.plan-goal {
+  margin: 0;
+  font-size: var(--font-body);
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.plan-compact-empty {
+  margin: 0;
+  font-size: var(--font-meta);
+  color: var(--text-muted);
+}
+
+.plan-clarify {
+  padding: 10px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-subtle) 80%, transparent);
+}
+
+.plan-clarify:last-child { border-bottom: none; }
+
+.plan-clarify-q {
+  font-size: var(--font-body);
+  color: var(--text);
+}
+
+.plan-clarify-a {
+  margin-top: 4px;
+  font-size: var(--font-meta);
+  color: var(--text-secondary);
+}
+
+.plan-risk-list {
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--text-secondary);
+  font-size: var(--font-body);
+}
+
+.plan-step-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.plan-step-row {
+  padding: 10px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-subtle) 85%, transparent);
+}
+
+.plan-step-row:last-child { border-bottom: none; }
+
+/*
+ * 用可换行的弹性布局，不用固定列的 grid。
+ *
+ * 原来是 `28px minmax(0,1fr) auto` 三列：状态徽章那一列不肯收缩，
+ * 在右侧窄面板（约 300px）里标题列被压到只剩一个字宽，
+ * 于是「新建 billing.html（用量与账单）」被竖着排成一列。
+ * 现在放不下就让徽章换到下一行，标题永远拿得到整行宽度。
+ */
+.plan-step-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  align-items: baseline;
+}
+
+.plan-step-head > .plan-step-title {
+  /* min-width:0 是关键：不给它，长单词/长路径会把这一行顶出去而不是换行。 */
+  flex: 1 1 8em;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.plan-step-head > .plan-step-status {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+/* 步骤编排：与正文共存，默认折叠，展开才是拖拽排序那一套。 */
+.plan-step-arrange {
+  margin-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--border-subtle) 85%, transparent);
+  padding-top: 8px;
+}
+
+.plan-step-arrange-summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: var(--font-small, 12px);
+  user-select: none;
+}
+
+.plan-step-arrange-summary:hover { color: var(--text); }
+
+/* 编排区里不再重复一遍「实施步骤」标题：上面的清单已经有了。 */
+.plan-step-arrange .plan-steps-edit > .plan-sec-title { display: none; }
+
+.plan-step-check {
+  flex: 0 0 auto;
+  margin: 0;
+  align-self: center;
+  accent-color: var(--accent, currentColor);
+}
+
+.plan-step-check:disabled { opacity: 0.5; }
+
+/* 这次不做的步骤压暗，但仍然看得见——它随时能被勾回来。 */
+.plan-step-excluded .plan-step-title {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.plan-step-excluded .plan-step-desc { display: none; }
+
+.plan-step-index {
+  flex: 0 0 auto;
+  min-width: 1.4em;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.plan-step-title {
+  color: var(--text);
+  font-size: var(--font-body);
+}
+
+.plan-step-status {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.plan-step-status.status-in_progress { color: var(--accent); }
+.plan-step-status.status-completed { color: #3ecf8e; }
+.plan-step-status.status-failed { color: var(--danger); }
+
+.plan-step-desc {
+  margin: 6px 0 0 36px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.plan-step-desc > :first-child { margin-top: 0; }
+.plan-step-desc > :last-child { margin-bottom: 0; }
+
+.plan-file-chips { display: flex; flex-direction: column; gap: 8px; }
+.plan-file-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.plan-file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--text) 3%, transparent);
+  font-size: 12px;
+}
+
+.plan-file-chip-label {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 280px;
+}
+
+.plan-file-chip-x {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 0 2px;
+  cursor: pointer;
+}
+
+.plan-file-add-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.plan-inline-input,
+.plan-field {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--bg-main);
+  border-radius: 6px;
+  padding: 8px 10px;
+  outline: none;
+  color: var(--text);
+  font: inherit;
+}
+
+.plan-mode-read .plan-field,
+.plan-mode-read textarea,
+.plan-mode-read input {
+  display: none;
+}
+
+.plan-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.plan-edit-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text) 2%, transparent);
+}
+
+.plan-field-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.plan-mode-edit .plan-field {
+  border-color: var(--border);
+  resize: none;
+  overflow: hidden;
+  min-height: 36px;
+}
+
+.plan-step-editor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.plan-step-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text) 2%, transparent);
+}
+
+.plan-step-editor.dragging { opacity: 0.55; }
+.plan-step-editor.drag-over { border-color: var(--accent); }
+
+.plan-step-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.plan-step-grip {
+  color: var(--text-muted);
+  cursor: grab;
+  user-select: none;
+}
+
+.plan-mini-btn {
+  font-size: 12px !important;
+  padding: 2px 8px !important;
+  height: auto !important;
+}
+
+.plan-clarify-edit,
+.plan-risk-edit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+}
+
+/* 计划原文的 markdown 正文：与助手消息同一套 .code-block / 表格样式，这里只管排版密度。 */
+/*
+ * 正文排版交给 .md-body（与助手消息同一套字号阶梯、表格、代码块）。
+ * 这里原先自己压了一套 15/14/13px 的字号，是照窄侧栏调的；可同一份文档也会
+ * 渲染在中栏和工作台，于是标题和正文几乎一样大，一整篇糊成一片没有层级。
+ * 现在只留文档特有的两处差异。
+ */
+.plan-raw-md > :first-child { margin-top: 0; }
+.plan-raw-md > :last-child { margin-bottom: 0; }
+
+/* 文档头部已经有大标题了，正文里的 h1 按章节标题看待，不再顶一个更大的字号 */
+.plan-raw-md h1 { font-size: 1.2em; }
+
+.plan-raw-md h2 { margin-top: 1.4em; }
+
+/*
+ * 代码块和表格默认用 --bg-card，而计划卡本身就是这个色，摆在一起只剩一圈边框，
+ * 少了 Cursor 那种"凹一层"的分层感。在计划卡里换成比卡片更深（浅色主题下更浅）的底。
+ */
+.plan-card .code-block,
+.plan-card .table-scroll {
+  background: var(--bg-main);
+}
+
+.plan-card th {
+  background: color-mix(in srgb, var(--text) 4%, var(--bg-main));
+}
+
+/* Cursor 式：渲染态 contenteditable，不是源码 textarea */
+.plan-wysiwyg {
+  cursor: text;
+  border-radius: 8px;
+  outline: none;
+  min-height: 120px;
+  padding: 4px 2px;
+  transition: background 120ms ease, box-shadow 120ms ease;
+}
+
+.plan-wysiwyg:hover {
+  background: color-mix(in srgb, var(--text) 2.5%, transparent);
+}
+
+.plan-wysiwyg:focus {
+  background: color-mix(in srgb, var(--text) 3.5%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.plan-raw-editable {
+  cursor: text;
+}
+
+.plan-compact-title-btn {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.plan-compact-title-btn:hover {
+  color: var(--accent);
+}
+
+/* 审批未决时的修改意见输入（已弃用入口，样式保留防旧 DOM） */
+.plan-revise-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.plan-revise-input {
+  flex: 1;
+  resize: vertical;
+  min-height: 44px;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: var(--font-body);
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+}
+
+.plan-revise-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.plan-action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.plan-action-bar .btn-primary { order: 5; }
+.plan-action-bar .btn-danger { order: 4; }
+
+/* 中间会话流的紧凑计划卡：完整文档在右侧工作台（对标 Cursor） */
+.plan-compact-card {
+  gap: 10px;
+  padding: 12px 16px;
+}
+
+.plan-compact-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 12px;
+}
+
+.plan-compact-title {
+  font-size: var(--font-body);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.plan-progress {
+  font-size: var(--font-meta);
+  color: var(--text-muted);
+}
+
+.plan-compact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* 右侧工作台里的完整计划文档：窄栏适配，去掉卡片边框融入面板 */
+.tab-panel .plan-card {
+  max-width: none;
+  padding: 4px 2px 12px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.tab-panel .plan-doc-title { font-size: 15px; }
+
+/* 工作台那一栏只有 ~348px，正文降一档，表格和代码块才不至于一直横向滚 */
+.tab-panel .plan-raw-md,
+.tab-panel .plan-step-desc { font-size: 12.5px; }
+
+.tab-panel .plan-step-desc { margin-left: 0; }
+
+.tab-panel .plan-revise-row {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/*
+ * 右侧 Plan 投影。
+ *
+ * 这一段刻意只用 --vscode-* 变量：它渲染在 VS Code 原生侧边栏容器里，
+ * 和资源管理器、大纲视图上下相邻。用自定义暗色调色板会在浅色主题或
+ * 高对比主题下和相邻面板明显割裂。
+ */
+.plan-right-rail {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 4px 0 0;
+  font-size: 12px;
+  color: var(--vscode-sideBar-foreground, var(--vscode-foreground));
+}
+
+.plan-right-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 12px 8px;
+}
+
+.plan-right-title {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--vscode-foreground);
+}
+
+.plan-right-goal {
+  color: var(--vscode-descriptionForeground);
+  line-height: 1.45;
+  /* 目标可能很长；两行足够判断"是不是这个计划"，细节回主面板看。 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.plan-right-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0 12px 10px;
+}
+
+.plan-right-progress-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.plan-right-progress-count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--vscode-foreground);
+}
+
+.plan-right-progress-label {
+  color: var(--vscode-descriptionForeground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 槽用前景色兑出来的淡色而不是固定灰：浅色主题下固定灰会比背景还浅、整条看不见。 */
+.plan-right-progress-track {
+  height: 3px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--vscode-foreground) 14%, transparent);
+}
+
+.plan-right-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--vscode-progressBar-background, var(--vscode-textLink-foreground));
+  transition: width 160ms ease-out;
+}
+
+.plan-right-progress-fill.has-failure {
+  background: var(--vscode-editorError-foreground, var(--vscode-errorForeground));
+}
+
+.plan-right-steps {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 4px 8px;
+}
+
+.plan-right-step {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 5px 8px;
+  border-radius: 4px;
+  border-left: 2px solid transparent;
+}
+
+.plan-right-step:hover { background: var(--vscode-list-hoverBackground); }
+
+/* 当前步骤要能在一屏步骤里被一眼扫到，用 VS Code 自己的"选中项"底色。 */
+.plan-right-step.is-in_progress {
+  background: var(--vscode-list-inactiveSelectionBackground);
+  border-left-color: var(--vscode-textLink-foreground);
+}
+
+.plan-right-step.is-failed { border-left-color: var(--vscode-editorError-foreground, var(--vscode-errorForeground)); }
+.plan-right-step.is-completed { border-left-color: var(--vscode-charts-green, var(--vscode-testing-iconPassed)); }
+
+.plan-right-step-mark {
+  flex: 0 0 12px;
+  text-align: center;
+  line-height: 1.5;
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.plan-right-step.is-completed .plan-right-step-mark {
+  color: var(--vscode-charts-green, var(--vscode-testing-iconPassed));
+}
+
+.plan-right-step.is-in_progress .plan-right-step-mark { color: var(--vscode-textLink-foreground); }
+
+.plan-right-step.is-failed .plan-right-step-mark {
+  color: var(--vscode-editorError-foreground, var(--vscode-errorForeground));
+}
+
+/* 待开始的步骤没有符号，用空心圆占位，保证标题左边缘对齐。 */
+.plan-right-step.is-pending .plan-right-step-mark::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  vertical-align: middle;
+  border: 1px solid var(--vscode-descriptionForeground);
+  opacity: 0.6;
+}
+
+.plan-right-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.plan-right-step-title {
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.plan-right-step.is-completed .plan-right-step-title,
+.plan-right-step.is-skipped .plan-right-step-title {
+  color: var(--vscode-descriptionForeground);
+}
+
+.plan-right-step.is-skipped .plan-right-step-title { text-decoration: line-through; }
+
+.plan-right-step-meta {
+  display: flex;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+}
+
+/* 底部操作条常驻：步骤列表滚动时"开始构建"不该被滚出视野。 */
+.plan-right-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+  padding: 8px 12px;
+  border-top: 1px solid var(--vscode-sideBarSectionHeader-border, var(--vscode-editorWidget-border));
+  background: var(--vscode-sideBar-background);
+}
+
+.plan-right-footer button {
+  flex: 1 1 auto;
+  min-width: 88px;
+}
+
+.plan-right-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 12px;
+}
+
+.plan-right-empty-title {
+  font-weight: 600;
+  color: var(--vscode-foreground);
+}
+
+.plan-right-empty-hint {
+  color: var(--vscode-descriptionForeground);
+  line-height: 1.5;
+}
+
+.chips:empty,
+.chips[hidden],
+.chips.chips-empty {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  border: none !important;
+}

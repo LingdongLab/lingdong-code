@@ -1,0 +1,31 @@
+{
+  "name": "@lingdong/agent-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "description": "灵动 Code Agent Runtime：Grok Build ACP 会话、安全策略与事件标准化",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "tsx --test tests/protocol.test.ts tests/logger.test.ts tests/risk-policy.test.ts tests/permission-explainer.test.ts tests/plan-parser.test.ts tests/session-permissions.test.ts tests/prompt-rules.test.ts tests/safety-policy.test.ts tests/event-normalizer.test.ts tests/hunk-tracker.test.ts tests/process-manager.test.ts tests/acp-client.test.ts tests/ask-question-flow.test.ts tests/agent-runtime.test.ts tests/turn-continuity.test.ts tests/permission-flow.test.ts tests/plan-flow.test.ts tests/version.test.ts tests/grok-build-adapter.test.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

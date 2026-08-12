@@ -1,0 +1,249 @@
+/*
+ * Agent Markdown 文档排版（G-R2.1）
+ *
+ * 只管 Markdown 正文内部。消息容器（.messages-inner、.message.user）的布局在 main.css，
+ * 这里曾经重复定义过一遍，两份值一旦漂移就得靠 CSS 顺序猜哪个生效。
+ */
+
+.assistant-msg {
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.assistant-header {
+  font-size: var(--font-meta, 12px);
+  font-weight: 650;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+}
+
+/* 同一轮里的后续正文没有表头，靠更紧的间距表明「这还是上一段的延续」。 */
+.assistant-msg.assistant-continued {
+  margin-top: calc(var(--gap-2, 8px) * -1);
+}
+
+.md-body {
+  max-width: 100%;
+  line-height: 1.7;
+  color: var(--text);
+  font-size: var(--font-body, 14px);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  overflow-x: hidden;
+}
+
+/*
+ * 窄正文 + 宽代码：文字每行超过 ~80 字符眼睛就要费力找行首，
+ * 但代码和表格反过来——挤窄了只会到处折行。所以只收窄文字块。
+ */
+.md-body > :is(p, ul, ol, blockquote, h1, h2, h3, h4, h5, h6),
+.md-body > .md-block > :is(p, ul, ol, blockquote, h1, h2, h3, h4, h5, h6) {
+  max-width: var(--prose-max, 680px);
+}
+
+.md-body > :first-child { margin-top: 0; }
+.md-body > :last-child { margin-bottom: 0; }
+
+/* 增量渲染的块包装器不参与布局，段落间距与整段渲染保持一致 */
+.md-body > .md-block { display: contents; }
+.md-body > .md-block:first-child > :first-child { margin-top: 0; }
+.md-body > .md-block:last-child > :last-child { margin-bottom: 0; }
+
+.md-body h1,
+.md-body h2,
+.md-body h3,
+.md-body h4 {
+  font-weight: 650;
+  line-height: 1.35;
+  margin: 1.1em 0 0.45em;
+  color: var(--text);
+}
+
+.md-body h1 { font-size: 1.35em; }
+.md-body h2 { font-size: 1.2em; }
+.md-body h3 { font-size: 1.08em; }
+.md-body h4 { font-size: 1em; color: var(--text-secondary); }
+
+.md-body p { margin: 0.55em 0; }
+
+.md-body ul,
+.md-body ol {
+  margin: 0.45em 0;
+  padding-left: 1.35em;
+}
+
+.md-body li { margin: 0.2em 0; }
+
+.md-body li:has(> .task-list-item-checkbox) {
+  list-style: none;
+  margin-left: -1.1em;
+}
+
+.md-body blockquote {
+  margin: 0.7em 0;
+  padding: 0.2em 0 0.2em 12px;
+  border-left: 3px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.md-body hr {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin: 1.2em 0;
+}
+
+.md-body a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.md-body a:hover { text-decoration: underline; }
+
+.md-body code {
+  font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+  font-size: 0.92em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text) 6%, var(--bg-card));
+  border: 1px solid var(--border-subtle);
+}
+
+/* 正文里的仓库文件引用：看着是 chip，点一下直接跳到那一行。 */
+.md-body code.file-ref {
+  cursor: pointer;
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border-subtle));
+  color: var(--accent);
+}
+
+.md-body code.file-ref:hover,
+.md-body code.file-ref:focus-visible {
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  color: var(--text);
+}
+
+.md-body .code-block {
+  margin: 0.75em 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+  overflow: hidden;
+}
+
+.md-body .code-block-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.md-body .code-lang { flex: 1; }
+
+.md-body .code-copy {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.md-body .code-block pre {
+  margin: 0;
+  padding: 12px 14px;
+  overflow-x: auto;
+  background: transparent;
+  border: none;
+}
+
+.md-body .code-block pre code {
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.md-body .table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  margin: 0.75em 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.md-body table {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+  font-size: 13px;
+}
+
+.md-body th,
+.md-body td {
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.md-body th {
+  color: var(--text-secondary);
+  font-weight: 600;
+  background: color-mix(in srgb, var(--text) 3%, var(--bg-card));
+}
+
+.assistant-msg.plan-collapsed .md-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+}
+
+.tool-summary {
+  margin: 0;
+}
+
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  background: transparent;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.icon-btn:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.tabs {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.right {
+  min-width: 0;
+}
+
+.empty-state.compact {
+  padding: 12px;
+  font-size: 12px;
+}

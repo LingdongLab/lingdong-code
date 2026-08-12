@@ -1,0 +1,34 @@
+{
+  "nameShort": "Lingdong",
+  "nameLong": "灵动 Code",
+  "applicationName": "lingdong",
+  "dataFolderName": ".lingdong-code",
+  "serverApplicationName": "lingdong-server",
+  "serverDataFolderName": ".lingdong-code-server",
+  "urlProtocol": "lingdong",
+  "win32MutexName": "lingdongcode",
+  "win32DirName": "Lingdong Code",
+  "win32NameVersion": "灵动 Code",
+  "win32RegValueName": "LingdongCode",
+  "win32AppUserModelId": "Lingdong.LingdongCode",
+  "win32ShellNameShort": "用灵动 Code 打开(&L)",
+  "win32x64AppId": "{{0E6DE654-4475-4CE0-A152-15174B575472}",
+  "win32x64UserAppId": "{{1779EE80-562B-47AD-A2EC-805119E7DAD0}",
+  "darwinBundleIdentifier": "com.lingdong.code",
+  "linuxIconName": "lingdong",
+  "licenseName": "MIT",
+  "licenseUrl": "https://github.com/microsoft/vscode/blob/main/LICENSE.txt",
+  "updateUrl": "",
+  "extensionsGallery": {
+    "serviceUrl": "https://open-vsx.org/vscode/gallery",
+    "itemUrl": "https://open-vsx.org/vscode/item",
+    "resourceUrlTemplate": "https://open-vsx.org/vscode/unpkg/{publisher}/{name}/{version}/{path}",
+    "controlUrl": "",
+    "nlsBaseUrl": "",
+    "publisherUrl": ""
+  },
+  "linkProtectionTrustedDomains": [
+    "https://open-vsx.org"
+  ],
+  "builtInExtensions": []
+}

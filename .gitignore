@@ -1,0 +1,51 @@
+# Dependencies & build outputs
+node_modules/
+dist/
+out/
+logs/
+*.log
+*.vsix
+.build/
+.tools/
+.cache/
+.turbo/
+coverage/
+
+# Desktop shell (cloned / built locally — do not commit)
+desktop/vscode/
+desktop/out/
+desktop/VSCode-win32-x64/
+desktop/.tools/
+desktop/.cache/
+desktop/product/product.merged.snapshot.json
+desktop/vscode-pin.json
+
+# Grok runtime binary & local agent home (never commit secrets/sessions)
+grok/bin/*.exe
+grok/bin/*.bak
+grok/data/
+grok-src/
+
+# Local secrets / env
+.env
+.env.*
+*.pem
+**/secrets/
+**/auth.json
+
+# Editor / OS junk
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Test / workspace scratch
+workspace/
+**/logs/
+
+# 预编译绿色包体积约 192MB，超过 GitHub 普通文件 100MB 限制。
+# 本机可放在 releases\ 供拷贝；对外请用 GitHub Release 附件（scripts\publish-github-release.ps1）。
+releases/*.zip
+releases/*.exe

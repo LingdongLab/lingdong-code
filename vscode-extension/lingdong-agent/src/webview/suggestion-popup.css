@@ -1,0 +1,91 @@
+/* @ 与 / 共用的候选浮层：紧贴 Composer 上沿，不覆盖底部控制栏。 */
+
+.suggest-popup {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 6px);
+  z-index: 24;
+  max-height: 280px;
+  overflow: auto;
+  padding: 4px;
+  background: var(--bg-float);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-float);
+  box-shadow: var(--shadow-float);
+}
+
+/* overflow/padding 不会覆盖 [hidden]，但与其他浮层保持同一写法便于排查。 */
+.suggest-popup[hidden] {
+  display: none !important;
+}
+
+.suggest-section {
+  padding: 6px 8px 3px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.suggest-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gap-2);
+  width: 100%;
+  padding: 5px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: var(--font-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.suggest-item.active {
+  background: var(--accent-soft);
+}
+
+.suggest-item.disabled {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.suggest-main {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gap-2);
+  min-width: 0;
+  flex: 1;
+}
+
+.suggest-name {
+  white-space: nowrap;
+}
+
+.suggest-detail {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  text-align: left;
+  font-size: var(--font-meta);
+  color: var(--text-secondary);
+}
+
+.suggest-item.disabled .suggest-detail {
+  direction: ltr;
+}
+
+.suggest-hint {
+  flex: none;
+  font-size: var(--font-meta);
+  color: var(--text-muted);
+}
+
+.suggest-footer {
+  padding: 6px 8px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--font-meta);
+  color: var(--text-secondary);
+}

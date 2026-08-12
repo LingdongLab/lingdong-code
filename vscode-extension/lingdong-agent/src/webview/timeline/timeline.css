@@ -1,0 +1,265 @@
+/*
+ * 任务时间线。
+ * 紧凑行式布局；不使用渐变、发光或闪烁动画。
+ *
+ * 颜色统一取对话栏的调色板（--text / --border / --ok / --danger，见 main.css），
+ * 以 --vscode-* 兜底：时间线渲染在对话栏里，和助手气泡上下相邻，之前直接用 --vscode-*
+ * 会比周围的正文更亮或更暗，同一列里出现两套灰阶。兜底保留是为了它被侧栏单独加载时不至于没色。
+ */
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: var(--gap-2, 8px) 0;
+  padding: 4px 0 2px 10px;
+  border-left: 2px solid var(--border-subtle, var(--vscode-panel-border, rgba(255, 255, 255, 0.1)));
+}
+
+/* 运行中的轮次给左边条一点存在感，一眼能看出任务还在跑 */
+.timeline[data-status="running"] {
+  border-left-color: var(--accent, var(--vscode-focusBorder, rgba(255, 255, 255, 0.3)));
+}
+
+.tl-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+/* —— 分组行 —— */
+
+.tl-group {
+  border-radius: 4px;
+}
+
+.tl-group > summary {
+  display: block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  list-style: none;
+  /* 12px 组头夹在 11px 明细和 14px 正文之间毫无层级，抬到 13px 才立得住。 */
+  font-size: var(--font-sub-sm, 13px);
+  line-height: 1.55;
+}
+
+.tl-group-headline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.tl-group > summary::-webkit-details-marker {
+  display: none;
+}
+
+.tl-group > summary:hover {
+  background: var(--vscode-list-hoverBackground, color-mix(in srgb, var(--text, #fff) 5%, transparent));
+}
+
+.tl-group-main {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tl-group-title {
+  color: var(--text, var(--vscode-foreground));
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* 计划步骤只做副标题，永不替换主标题 */
+.tl-group-subtitle {
+  color: var(--text-secondary, var(--vscode-descriptionForeground));
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 运行中的组在标题行直接给出当前条目，例如「正在修改 src/foo.ts」 */
+.tl-group-current {
+  color: var(--text-secondary, var(--vscode-descriptionForeground));
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tl-group-current::before {
+  content: "·";
+  margin-right: 6px;
+  opacity: 0.6;
+}
+
+.tl-group-current[hidden] {
+  display: none;
+}
+
+.tl-group-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex: 0 0 auto;
+  color: var(--text-muted, var(--vscode-descriptionForeground));
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.tl-group-status,
+.tl-summary-status {
+  font-size: 11px;
+}
+
+.tl-group-status.tl-running,
+.tl-summary-status.tl-running {
+  color: var(--text-secondary, var(--vscode-descriptionForeground));
+}
+
+.tl-group-status.tl-completed,
+.tl-summary-status.tl-completed {
+  color: var(--ok, var(--vscode-charts-green, #4ec9b0));
+}
+
+.tl-group-status.tl-failed,
+.tl-summary-status.tl-failed {
+  color: var(--danger, var(--vscode-errorForeground, #f14c4c));
+}
+
+.tl-group-status.tl-stopped,
+.tl-summary-status.tl-stopped,
+.tl-summary-status.tl-interrupted {
+  color: var(--text-muted, var(--vscode-descriptionForeground));
+}
+
+/* —— 实时输出尾巴（运行中的命令，折叠状态也显示）—— */
+
+.tl-group-output,
+.tl-item-output {
+  margin: 3px 0 1px 10px;
+  padding: 3px 8px;
+  max-height: 64px;
+  overflow: hidden;
+  border-left: 2px solid var(--border-subtle, var(--vscode-panel-border, rgba(255, 255, 255, 0.12)));
+  border-radius: 2px;
+  background: var(--bg-card, var(--vscode-textCodeBlock-background, rgba(255, 255, 255, 0.04)));
+  color: var(--text-muted, var(--vscode-descriptionForeground));
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.tl-group-output[hidden] {
+  display: none;
+}
+
+.tl-item-output {
+  margin-left: 10px;
+}
+
+/* —— 展开的条目 —— */
+
+.tl-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 1px 0 3px 14px;
+}
+
+.tl-group:not([open]) > .tl-group-items {
+  display: none;
+}
+
+.tl-item-line {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-secondary, var(--vscode-descriptionForeground));
+}
+
+.tl-item-dot {
+  width: 4px;
+  height: 4px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.tl-item-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tl-item.tl-failed .tl-item-line {
+  color: var(--danger, var(--vscode-errorForeground, #f14c4c));
+}
+
+/* 正在进行的条目用前景色顶出来，与已完成的灰行区分 */
+.tl-item.tl-running .tl-item-line {
+  color: var(--text, var(--vscode-foreground));
+}
+
+.tl-item-detail {
+  margin: 2px 0 2px 10px;
+  padding: 4px 6px;
+  max-height: 120px;
+  overflow: auto;
+  border-radius: 3px;
+  background: var(--bg-card, var(--vscode-textCodeBlock-background, rgba(255, 255, 255, 0.05)));
+  color: var(--text-secondary, var(--vscode-descriptionForeground));
+  font-size: 11px;
+  white-space: pre-wrap;
+}
+
+.tl-item-log {
+  align-self: flex-start;
+  margin-left: 10px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent, var(--vscode-textLink-foreground));
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.tl-item-log:hover {
+  text-decoration: underline;
+}
+
+/* —— 结算行 —— */
+
+.tl-hint {
+  padding: 2px 6px;
+  color: var(--text-muted, var(--vscode-descriptionForeground));
+  font-size: 11px;
+}
+
+.tl-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 2px 6px;
+  color: var(--text-secondary, var(--vscode-descriptionForeground));
+  font-size: 11px;
+}
+
+.tl-summary[hidden],
+.tl-summary-stats[hidden],
+.tl-summary-status[hidden],
+.tl-summary-duration[hidden],
+.tl-group-stats[hidden],
+.tl-group-duration[hidden],
+.tl-group-status[hidden],
+.tl-group-subtitle[hidden] {
+  display: none;
+}

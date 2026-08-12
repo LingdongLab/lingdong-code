@@ -1,0 +1,8 @@
+vscode/
+out/
+.tools/
+.cache/
+*.log
+node_modules/
+product/product.merged.snapshot.json
+vscode-pin.json

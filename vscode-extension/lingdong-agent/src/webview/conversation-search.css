@@ -1,0 +1,72 @@
+/* 会话内查找条：贴在对话区右上角，不使用浏览器原生查找框。 */
+
+/* sticky 而非 absolute：.messages 自己是滚动容器，查找条要跟着视口留在顶部。 */
+.search-bar {
+  position: sticky;
+  top: 0;
+  z-index: 22;
+  width: fit-content;
+  margin: 0 0 var(--gap-3) auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  background: var(--bg-float);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-float);
+  box-shadow: var(--shadow-float);
+}
+
+.search-bar[hidden] {
+  display: none !important;
+}
+
+.search-input {
+  width: 180px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-main);
+  color: var(--text);
+  font-size: var(--font-body);
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+.search-count {
+  min-width: 56px;
+  text-align: center;
+  font-size: var(--font-meta);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.search-nav {
+  min-width: 22px;
+  padding: 2px 5px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.search-nav:hover:not(:disabled) {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.search-nav:disabled {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+/* 命中定位：只给当前命中节点一个克制的描边，不做闪烁动画。 */
+.search-hit {
+  outline: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}

@@ -1,0 +1,624 @@
+{
+  "name": "lingdong-agent",
+  "displayName": "灵动 Code",
+  "description": "灵动 Code 的 Agent 面板原型：通过 ACP 连接 Grok Build，与 DeepSeek 模型进行中文对话。",
+  "version": "0.1.0",
+  "publisher": "lingdong",
+  "license": "SEE LICENSE IN LICENSE",
+  "icon": "media/icon-128.png",
+  "engines": {
+    "vscode": "^1.84.0",
+    "node": ">=20"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "灵动 Code 会在工作区里读写文件、执行终端命令。不声明的话，受限模式下扩展会连同活动栏图标一起无声消失，用户只会觉得产品坏了；声明之后 VS Code 会明确告诉他需要先信任这个文件夹。"
+    }
+  },
+  "contributes": {
+    "configurationDefaults": {
+      "workbench.activityBar.location": "hidden",
+      "workbench.secondarySideBar.defaultVisibility": "hidden",
+      "workbench.editor.showTabs": "none",
+      "workbench.editor.editorActionsLocation": "hidden",
+      "window.commandCenter": false,
+      "window.menuBarVisibility": "classic",
+      "window.title": "",
+      "workbench.layoutControl.enabled": false,
+      "workbench.startupEditor": "none",
+      "lingdongAgent.windowShape": "agent"
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "lingdongAgent",
+          "title": "灵动 Code",
+          "icon": "media/icon.svg"
+        }
+      ],
+      "secondarySidebar": [
+        {
+          "id": "lingdongAgentRight",
+          "title": "灵动 Code",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "lingdongAgent": [
+        {
+          "id": "lingdongAgent.sessionTree",
+          "name": "会话",
+          "icon": "media/icon.svg",
+          "contextualTitle": "会话"
+        },
+        {
+          "type": "webview",
+          "id": "lingdongAgent.chatView",
+          "name": "打开面板",
+          "icon": "media/icon.svg",
+          "contextualTitle": "灵动 Code"
+        }
+      ],
+      "lingdongAgentRight": [
+        {
+          "type": "webview",
+          "id": "lingdongAgent.planView",
+          "name": "Plan",
+          "contextualTitle": "Plan"
+        },
+        {
+          "type": "webview",
+          "id": "lingdongAgent.tasksView",
+          "name": "Tasks",
+          "contextualTitle": "Tasks"
+        },
+        {
+          "type": "webview",
+          "id": "lingdongAgent.changesView",
+          "name": "Changes",
+          "contextualTitle": "Changes"
+        },
+        {
+          "type": "webview",
+          "id": "lingdongAgent.contextView",
+          "name": "Context",
+          "contextualTitle": "Context"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "lingdongAgent.sessionTree",
+        "when": "lingdongAgent.firstRun == noWorkspace",
+        "contents": "灵动 Code 需要一个文件夹作为仓库边界，先添加一个。\n[添加仓库](command:lingdongAgent.addWorkspaceFolder)"
+      },
+      {
+        "view": "lingdongAgent.sessionTree",
+        "when": "lingdongAgent.firstRun == noApiKey",
+        "contents": "还差一个模型服务商的 API Key。填好之后就能开始对话。\n[打开模型设置](command:lingdongAgent.openModelSettings)\n密钥保存在系统凭据库，不会写进设置或配置文件。"
+      },
+      {
+        "view": "lingdongAgent.sessionTree",
+        "when": "lingdongAgent.firstRun == ready",
+        "contents": "还没有会话。\n[新建 Agent](command:lingdongAgent.newSession)\n[打开主面板](command:lingdongAgent.openAgent)\n[搜索会话](command:lingdongAgent.searchSessions)"
+      }
+    ],
+    "commands": [
+      {
+        "command": "lingdongAgent.open",
+        "title": "打开灵动 Code",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.openAgent",
+        "title": "打开 Agent 主面板",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.moveToSecondarySideBar",
+        "title": "把灵动 Code 移到辅助侧边栏",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.toggleWindowShape",
+        "title": "切换 Agent / IDE 形态",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.newSession",
+        "title": "新建会话",
+        "category": "灵动 Code",
+        "icon": "$(add)"
+      },
+      {
+        "command": "lingdongAgent.searchSessions",
+        "title": "搜索会话",
+        "category": "灵动 Code",
+        "icon": "$(search)"
+      },
+      {
+        "command": "lingdongAgent.openSession",
+        "title": "打开会话",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.pinSession",
+        "title": "固定/取消固定会话",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.archiveSession",
+        "title": "归档/取消归档会话",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.renameSessionTree",
+        "title": "重命名会话",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.deleteSessionTree",
+        "title": "删除会话",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.selectModel",
+        "title": "选择模型",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.compactContext",
+        "title": "压缩上下文",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.addDiagnostics",
+        "title": "添加问题面板到上下文",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.startPlanBuild",
+        "title": "开始构建计划",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.pausePlanBuild",
+        "title": "暂停计划构建",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.resumePlanBuild",
+        "title": "继续计划构建",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.stop",
+        "title": "停止当前任务",
+        "category": "灵动 Code",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "lingdongAgent.switchMode",
+        "title": "切换模式",
+        "category": "灵动 Code",
+        "icon": "$(list-selection)"
+      },
+      {
+        "command": "lingdongAgent.showLogs",
+        "title": "查看日志",
+        "category": "灵动 Code",
+        "icon": "$(output)"
+      },
+      {
+        "command": "lingdongAgent.reconnect",
+        "title": "重新连接 Grok",
+        "category": "灵动 Code",
+        "icon": "$(debug-restart)"
+      },
+      {
+        "command": "lingdongAgent.configureProviderKey",
+        "title": "配置模型服务商密钥",
+        "category": "灵动 Code",
+        "icon": "$(key)"
+      },
+      {
+        "command": "lingdongAgent.openSettings",
+        "title": "打开设置",
+        "category": "灵动 Code",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "lingdongAgent.openModelSettings",
+        "title": "设置：模型与服务商",
+        "category": "灵动 Code",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "lingdongAgent.backToAgent",
+        "title": "返回 Agent 主面板",
+        "category": "灵动 Code",
+        "icon": "$(arrow-left)"
+      },
+      {
+        "command": "lingdongAgent.openExtensions",
+        "title": "设置：Skills 与 MCP",
+        "category": "灵动 Code",
+        "icon": "$(extensions)"
+      },
+      {
+        "command": "lingdongAgent.showPrivacyStatus",
+        "title": "查看隐私状态",
+        "category": "灵动 Code",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "lingdongAgent.showAgentDiagnostics",
+        "title": "Agent 诊断（规则与能力）",
+        "category": "灵动 Code",
+        "icon": "$(stethoscope)"
+      },
+      {
+        "command": "lingdongAgent.clearPermissionRules",
+        "title": "清空已记住的权限规则",
+        "category": "灵动 Code",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "lingdongAgent.approvePlan",
+        "title": "批准当前计划",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.rejectPlan",
+        "title": "放弃当前计划",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.addCurrentFile",
+        "title": "添加当前文件到上下文",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.addSelection",
+        "title": "添加选中代码到上下文",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.addFiles",
+        "title": "添加指定文件到上下文",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.addFolder",
+        "title": "添加指定文件夹到上下文",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.addTerminalSelection",
+        "title": "将选中的终端输出添加到灵动 Code",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.openDiff",
+        "title": "查看本轮文件变更",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.undoTurn",
+        "title": "撤销本轮修改",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.sessionHistory",
+        "title": "会话历史",
+        "category": "灵动 Code",
+        "icon": "$(history)"
+      },
+      {
+        "command": "lingdongAgent.renameSession",
+        "title": "重命名当前会话",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.deleteSession",
+        "title": "删除当前会话",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.savePlan",
+        "title": "保存计划到工作区",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.locateGrok",
+        "title": "选择 Grok 可执行文件",
+        "category": "灵动 Code"
+      },
+      {
+        "command": "lingdongAgent.addWorkspaceFolder",
+        "title": "添加仓库",
+        "category": "灵动 Code"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "lingdongAgent.openAgent",
+        "key": "ctrl+alt+l",
+        "mac": "cmd+alt+l"
+      },
+      {
+        "command": "lingdongAgent.newSession",
+        "key": "ctrl+alt+n",
+        "mac": "cmd+alt+n"
+      },
+      {
+        "command": "lingdongAgent.stop",
+        "key": "ctrl+alt+backspace",
+        "mac": "cmd+alt+backspace",
+        "when": "lingdongAgent.busy"
+      },
+      {
+        "command": "lingdongAgent.switchMode",
+        "key": "ctrl+alt+m",
+        "mac": "cmd+alt+m"
+      },
+      {
+        "command": "lingdongAgent.sessionHistory",
+        "key": "ctrl+alt+h",
+        "mac": "cmd+alt+h"
+      },
+      {
+        "command": "lingdongAgent.addSelection",
+        "key": "ctrl+alt+k",
+        "mac": "cmd+alt+k",
+        "when": "editorHasSelection"
+      },
+      {
+        "command": "lingdongAgent.addCurrentFile",
+        "key": "ctrl+alt+u",
+        "mac": "cmd+alt+u",
+        "when": "editorTextFocus"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "lingdongAgent.newSession",
+          "when": "view == lingdongAgent.sessionTree || view == lingdongAgent.chatView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "lingdongAgent.searchSessions",
+          "when": "view == lingdongAgent.sessionTree",
+          "group": "navigation@2"
+        },
+        {
+          "command": "lingdongAgent.openAgent",
+          "when": "view == lingdongAgent.sessionTree || view == lingdongAgent.chatView",
+          "group": "navigation@3"
+        },
+        {
+          "command": "lingdongAgent.sessionHistory",
+          "when": "view == lingdongAgent.chatView",
+          "group": "navigation@4"
+        },
+        {
+          "command": "lingdongAgent.stop",
+          "when": "view == lingdongAgent.chatView",
+          "group": "navigation@5"
+        },
+        {
+          "command": "lingdongAgent.switchMode",
+          "when": "view == lingdongAgent.chatView",
+          "group": "navigation@6"
+        },
+        {
+          "command": "lingdongAgent.showLogs",
+          "when": "view == lingdongAgent.chatView",
+          "group": "navigation@7"
+        },
+        {
+          "command": "lingdongAgent.reconnect",
+          "when": "view == lingdongAgent.chatView",
+          "group": "navigation@8"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "lingdongAgent.renameSessionTree",
+          "when": "view == lingdongAgent.sessionTree && viewItem == lingdongSession",
+          "group": "1_actions@1"
+        },
+        {
+          "command": "lingdongAgent.pinSession",
+          "when": "view == lingdongAgent.sessionTree && viewItem == lingdongSession",
+          "group": "1_actions@2"
+        },
+        {
+          "command": "lingdongAgent.archiveSession",
+          "when": "view == lingdongAgent.sessionTree && viewItem == lingdongSession",
+          "group": "1_actions@3"
+        },
+        {
+          "command": "lingdongAgent.deleteSessionTree",
+          "when": "view == lingdongAgent.sessionTree && viewItem == lingdongSession",
+          "group": "1_actions@4"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "灵动 Code",
+      "properties": {
+        "lingdongAgent.windowShape": {
+          "type": "string",
+          "default": "agent",
+          "enum": [
+            "agent",
+            "ide"
+          ],
+          "enumDescriptions": [
+            "只留对话：收起活动栏与主侧边栏，主面板占满编辑区。关掉主面板会自动再打开，避免空白壳。",
+            "完整编辑器：显示活动栏与资源管理器；需要看文件树时用命令「切换 Agent / IDE 形态」。"
+          ],
+          "description": "窗口形态。默认 Agent（隐藏左侧 VS Code 栏）。可用命令「切换 Agent / IDE 形态」来回切。"
+        },
+        "lingdongAgent.grokExecutable": {
+          "type": "string",
+          "default": "",
+          "description": "Grok Build 可执行文件的绝对路径。留空时按「LINGDONG_GROK_EXECUTABLE 环境变量 → PATH → 常见安装位置」自动探测。已完成兼容性测试的版本为 1.0.0（随包自建产物）。"
+        },
+        "lingdongAgent.grokHome": {
+          "type": "string",
+          "default": "",
+          "description": "GROK_HOME 目录。留空时优先使用可执行文件同级的 data 目录，找不到则沿用当前进程的环境变量。填写后优先级高于托管目录。"
+        },
+        "lingdongAgent.managedGrokHome": {
+          "type": "boolean",
+          "default": true,
+          "description": "使用由灵动 Code 托管的 GROK_HOME。开启后 config.toml 由扩展生成，用于强制关闭遥测、Trace 上传、自动更新与远程目录抓取；原 GROK_HOME 只读不改。关闭后沿用探测到的目录，这些开关将无法保证。"
+        },
+        "lingdongAgent.sanitizeUpstreamResponses": {
+          "type": "boolean",
+          "default": true,
+          "description": "通过本地回环转发模型响应，修补服务商在 usage 里返回的 null 计数。部分模型（如 Poe 上的 kimi-k3）会因此让 Grok 整轮解析失败、一个字都返回不了。转发层不持有也不注入任何凭据，Authorization 原样透传。关闭后恢复直连服务商。"
+        },
+        "lingdongAgent.verifyAfterEdit": {
+          "type": "boolean",
+          "default": true,
+          "description": "Agent 改完文件、准备结束本轮时，自动跑一次项目自己声明的校验命令（package.json 里的 typecheck / type-check / lint，或有 tsconfig.json 时的 tsc --noEmit）。失败会把错误回灌给 Agent 让它在同一轮里继续修，一轮最多拦两次。项目没有声明这些脚本时不做任何事。"
+        },
+        "lingdongAgent.planStepGating": {
+          "type": "boolean",
+          "default": true,
+          "description": "批准计划后，由灵动 Code 逐步下发步骤：一轮只做一步，做完记上进度再发下一步，中途失败或被停就停在当前步骤并把计划置为暂停。关闭后退回把整份计划一次性发给 Agent，由它自己决定节奏。"
+        },
+        "lingdongAgent.memory": {
+          "type": "boolean",
+          "default": false,
+          "description": "跨会话记忆（Grok 官方标为实验性）。开启后 Grok 会把项目约定与结论写成本机 Markdown 文件（托管 GROK_HOME 的 memory 目录），并在新会话首轮自动带回相关内容。默认关闭：这会把对话里的结论长期留在磁盘上。也可在「Agent 能力 → 规则与记忆」里开关。"
+        },
+        "lingdongAgent.webFetch": {
+          "type": "boolean",
+          "default": false,
+          "description": "【通常不需要开启】灵动 Code 已内置联网工具（MCP lingdong_web 提供 WebSearch 与 WebFetch，常开、无需 API Key），搜索和读网页默认都走它。此项开启的是 Grok 自带的 web_fetch，与内置 WebFetch 功能重叠，开启后模型手上会多一个同类工具、用哪个变得不稳定。真正值得开的只有一种场景：出网必须经过代理——Grok 自带版支持代理（环境变量 GROK_WEB_FETCH_PROXY），内置版不支持。抓取仍受 Grok 的 SSRF 防护约束（本地回环、私网、云元数据默认拒绝）。"
+        },
+        "lingdongAgent.webFetchDomains": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Grok 自带 web_fetch 的抓取出口白名单（域名，含子域，大小写不敏感，例如 docs.rs、x.ai）。仅在开启上面的「Web Fetch」后生效，对内置的 lingdong_web WebFetch 没有影响。非空时抓取只允许命中这些域名，并让它们免二次确认；留空则沿用 Grok 内置默认白名单。"
+        },
+        "lingdongAgent.model": {
+          "type": "string",
+          "default": "deepseek-v4-flash",
+          "description": "当前版本固定使用的模型标识。"
+        },
+        "lingdongAgent.showReasoning": {
+          "type": "boolean",
+          "default": true,
+          "description": "在「思考」折叠块里给出模型的推理原文，展开即可查看。原文只从内存直达界面：不写入会话记录、不进任务时间线、不落磁盘，重开面板即消失。关闭后只保留脱敏后的阶段文案（如「正在阅读文件内容」）。"
+        },
+        "lingdongAgent.streamEditPreview": {
+          "type": "string",
+          "enum": [
+            "diff",
+            "reveal",
+            "off"
+          ],
+          "enumDescriptions": [
+            "Agent 一改文件就在编辑器里并排显示改前/改后 diff，落盘后右侧切换为真实文件，可就地继续编辑。",
+            "只把 Agent 正在改的文件揭示到编辑器，不开 diff 视图。",
+            "不自动打开任何编辑器，改动只在「变更」面板里事后查看。"
+          ],
+          "default": "off",
+          "description": "Agent 修改文件时的实时预览方式。默认关闭：Agent 一轮能改十几个文件，自动开标签会不停顶掉你正在看的东西；改动在会话流的变更摘要卡（含 +N/-N）与「变更」面板里事后看更省心。开启后预览标签都是临时（preview）标签且不抢输入焦点，会互相顶掉而不是堆积；前后全文合计超过 512 KB 时自动退回只揭示文件。"
+        },
+        "lingdongAgent.permissionTimeoutMs": {
+          "type": "number",
+          "default": 300000,
+          "minimum": 10000,
+          "description": "权限卡片等待人工决定的超时毫秒数。超时后自动拒绝该操作并把卡片标为失效。"
+        },
+        "lingdongAgent.approvalPolicy": {
+          "type": "string",
+          "default": "balanced",
+          "enum": [
+            "balanced",
+            "strict",
+            "yolo"
+          ],
+          "enumItemLabels": [
+            "均衡",
+            "严格",
+            "放行"
+          ],
+          "enumDescriptions": [
+            "工作区内的文件改动、构建/测试命令与 git 提交自动放行；删除、git push、装依赖、访问网络仍逐项确认。",
+            "只自动放行只读操作，其余每一项都要确认。弹窗最多，但改动前一定经过你。",
+            "除硬性禁止项（提权、注册表、磁盘格式化、系统级安装、强制推送）之外全部放行。"
+          ],
+          "description": "Agent 模式下的审批力度。任何力度都不会放行越界访问、凭据读取与硬性禁止的命令；每笔文件改动仍有修改前快照，可从「变更」面板撤销。"
+        },
+        "lingdongAgent.snapshotRetentionDays": {
+          "type": "number",
+          "default": 30,
+          "minimum": 1,
+          "description": "已接受或已恢复的快照保留天数。未处理与冲突快照永不自动删除。"
+        },
+        "lingdongAgent.snapshotMaxTotalMb": {
+          "type": "number",
+          "default": 512,
+          "minimum": 16,
+          "description": "快照总占用上限（MB）。超限时优先清理最旧的已接受/已恢复快照。"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "icon": "powershell -NoProfile -ExecutionPolicy Bypass -File ../../packaging/make-brand-assets.ps1 -Source ../../packaging/brand/lingdong-source.png -MarkSource ../../packaging/brand/lingdong-mark.png",
+    "package": "vsce package --no-dependencies --allow-missing-repository",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "tsx --tsconfig tsconfig.test.json --test tests/agent-controller.integration.test.ts tests/agent-controller.chain.test.ts tests/messages.test.ts tests/dropped-file.test.ts tests/setup-interrupt.test.ts tests/event-presenter.test.ts tests/workspace-guard.test.ts tests/version-notice.test.ts tests/permission-queue.test.ts tests/permission-facade.test.ts tests/permission-rule-repository.test.ts tests/side-panel-assets.test.ts tests/ui-state.test.ts tests/ask-intent.test.ts tests/plan-view-model.test.ts tests/todo-card.test.ts tests/question-facade.test.ts tests/ask-question-card.test.ts tests/turn-summary.test.ts tests/context-model.test.ts tests/snapshot-store.test.ts tests/change-tracker.test.ts tests/change-view.test.ts tests/change-summary-card.test.ts tests/change-summary-defer.test.ts tests/change-facade.test.ts tests/diff-model.test.ts tests/json-store.test.ts tests/session-repository.test.ts tests/session-title.test.ts tests/transcript-repository.test.ts tests/session-load-replay.test.ts tests/turn-repository.test.ts tests/plan-repository.test.ts tests/plan-markdown.test.ts tests/plan-step-sync.test.ts tests/plan-approval-chain.test.ts tests/send-queue.test.ts tests/queue-chips.test.ts tests/composer-chrome.test.ts tests/status-stack.test.ts tests/connection-preheat.test.ts tests/context-usage.test.ts tests/model-registry.test.ts tests/model-selection.test.ts tests/launch-model-choice.test.ts tests/workspace-switcher.test.ts tests/repo-tree-view.test.ts tests/runtime-failure.test.ts tests/model-proxy.test.ts tests/reconnect-visibility.test.ts tests/image-store.test.ts tests/image-injection.test.ts tests/thinking-indicator.test.ts tests/storage-concurrency.test.ts tests/workspace-store.test.ts tests/usage-format.test.ts tests/plan-build.test.ts tests/plan-auto-build.test.ts tests/plan-gate.test.ts tests/plan-step-ops.test.ts tests/diagnostics-context.test.ts tests/tool-aggregate.test.ts tests/message-renderer.test.ts tests/workbench-state.test.ts tests/plan-document-ui.test.ts tests/grok-locator.test.ts tests/message-actions.test.ts tests/webview-message-handler.test.ts tests/incremental-markdown.test.ts tests/conversation-view.test.ts tests/workbench-panels.test.ts tests/presentation-timeline.test.ts tests/timeline-view.test.ts tests/timeline-persistence.test.ts tests/context-candidates.test.ts tests/context-suggestion-service.test.ts tests/suggestion-popup.test.ts tests/slash-command.test.ts tests/slash-suggestions.test.ts tests/conversation-search.test.ts tests/provider-registry.test.ts tests/provider-secret-store.test.ts tests/provider-validator.test.ts tests/resolve-mcp-runtime.test.ts tests/host-web-search.test.ts tests/host-web-fetch.test.ts tests/duckduckgo-search.test.ts tests/mcp-stdio-framing.test.ts tests/web-search-mcp.test.ts tests/grok-config-writer.test.ts tests/agent-diagnostics.test.ts tests/runtime-env.test.ts tests/secret-redactor.test.ts tests/managed-grok-home.test.ts tests/session-provider-migration.test.ts tests/privacy-status.test.ts tests/provider-runtime-wiring.test.ts tests/provider-http-client.test.ts tests/provider-error-mapper.test.ts tests/provider-test-service.test.ts tests/capability-probe.test.ts tests/model-settings-messages.test.ts tests/custom-provider.test.ts tests/model-delete-rules.test.ts tests/model-switch-guard.test.ts tests/model-id-namespace.test.ts tests/poe-catalog.test.ts tests/poe-catalog-cache.test.ts tests/poe-provider.test.ts tests/first-run-gate.test.ts tests/window-shape.test.ts tests/file-scan.test.ts tests/active-repo.test.ts tests/repo-switch.test.ts tests/turn-status-machine.test.ts tests/turn-status-bar.test.ts tests/completed-summary.test.ts tests/stream-scroll-contract.test.ts tests/agent-reply-guidance.test.ts tests/skills-service.test.ts tests/extensions-messages.test.ts tests/mcp-server-registry.test.ts tests/verify-gate.test.ts tests/subagent-tracker.test.ts tests/background-task-tracker.test.ts tests/rules-service.test.ts tests/lsp-config.test.ts tests/edit-preview.test.ts tests/line-diff.test.ts tests/settings-messages.test.ts tests/settings-view.test.ts tests/settings-components.test.ts tests/settings-service.test.ts",
+    "check:live": "node scripts/live-acp-check.mjs",
+    "check:phase4": "node scripts/live-phase4-check.mjs",
+    "check:phase5": "tsx scripts/live-phase5-check.mjs",
+    "check:phase6": "tsx scripts/live-phase6-check.mjs",
+    "vscode:prepublish": "npm run build",
+    "check:largefile": "node scripts/check-large-file-edit.mjs",
+    "check:diagnostics": "tsx scripts/probe-diagnostics.mts",
+    "check:rules": "node scripts/probe-rules-injection.mjs",
+    "check:lsp": "tsx scripts/probe-lsp-config.mts",
+    "preview:permission-card": "tsx --tsconfig tsconfig.test.json scripts/preview-permission-card.mts"
+  },
+  "dependencies": {
+    "@lingdong/agent-runtime": "*",
+    "dompurify": "^3.4.13",
+    "highlight.js": "^11.11.1",
+    "markdown-it": "^15.0.0"
+  },
+  "devDependencies": {
+    "@types/dompurify": "^3.0.5",
+    "@types/jsdom": "^28.0.3",
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^20.19.0",
+    "@types/vscode": "^1.84.0",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.25.0",
+    "jsdom": "^29.1.1",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.0"
+  }
+}

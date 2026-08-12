@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "vscode": ["./tests/support/vscode-stub.ts"]
+    }
+  }
+}

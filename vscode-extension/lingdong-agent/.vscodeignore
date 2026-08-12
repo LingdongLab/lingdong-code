@@ -1,0 +1,17 @@
+# 打包进 VSIX 的只有运行期真正需要的东西：dist/ 产物、media/ 资源和清单。
+# esbuild 是全量 bundle（只 external vscode），所以源码与依赖都不必进包。
+
+src/**
+tests/**
+docs/**
+scripts/**
+node_modules/**
+
+tsconfig.json
+tsconfig.test.json
+esbuild.mjs
+.vscodeignore
+.test-out.txt
+
+# sourcemap 占了 dist 的大半，装到用户机器上没人会看
+dist/**/*.map
